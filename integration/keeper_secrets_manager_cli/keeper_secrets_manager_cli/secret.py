@@ -440,7 +440,14 @@ class Secret:
         if use_color is None:
             use_color = self.cli.user_color
 
-        record_dict = self.query(uids=uids, output_format='dict', unmask=True, use_color=use_color)
+        try:
+            record_dict = self.query(uids=uids, output_format="dict", unmask=True, use_color=use_color)
+        except KsmCliException as e:
+            if e.message == "Cannot find requested record(s)." and output_format == "json":
+                record_dict = []
+            else:
+                raise e
+
         if output_format == 'text':
             self.cli.output(self._format_list(record_dict, use_color=use_color))
         elif output_format == 'json':
